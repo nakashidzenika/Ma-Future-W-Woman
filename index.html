@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A Bouquet for You</title>
+  <style>
+    /* --- 1. ზოგადი სტილები და ფონი --- */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Arial', sans-serif;
+    }
+
+    body {
+      background-color: #f7ebe8;
+      overflow-x: hidden;
+    }
+
+    .trigger-input {
+      display: none;
+    }
+
+    /* --- 2. ჩაკეტილი ეკრანი (Lock Screen) --- */
+    .lock-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      background: radial-gradient(circle, #e29595 0%, #7c1a22 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+      transition: all 1s cubic-bezier(0.74, 0.01, 0.3, 1);
+    }
+
+    .lock-card {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      padding: 40px;
+      border-radius: 20px;
+      text-align: center;
+      color: white;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .lock-card h2 {
+      font-size: 24px;
+      margin-bottom: 25px;
+      letter-spacing: 2px;
+      line-height: 1.5;
+    }
+
+    .unlock-btn {
+      display: inline-block;
+      padding: 12px 35px;
+      background-color: #ff4d6d;
+      color: white;
+      font-weight: bold;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(255, 77, 109, 0.4);
+      transition: transform 0.2s, background 0.2s;
+    }
+
+    .unlock-btn:hover {
+      background-color: #ff758f;
+      transform: scale(1.05);
+    }
+
+    #unlock-site:checked ~ .lock-screen {
+      transform: translateY(-100vh);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* --- 3. მთავარი კონტენტი (Main Content) --- */
+    .main-content {
+      min-height: 100vh;
+      opacity: 0;
+      padding: 40px 20px;
+      background-image: linear-gradient(rgba(247,235,232,0.8), rgba(247,235,232,0.8)), url('https://images.unsplash.com/photo-1526047932273-341f2a7631f9?q=80&w=1000');
+      background-size: cover;
+      background-attachment: fixed;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 45px;
+      transition: opacity 1s ease 0.5s;
+    }
+
+    #unlock-site:checked ~ .main-content {
+      opacity: 1;
+    }
+
+    .romantic-text {
+      text-align: center;
+      max-width: 600px;
+      color: #590d22;
+      font-size: 20px;
+      line-height: 1.6;
+      font-style: italic;
+      background: rgba(255, 255, 255, 0.6);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+
+    /* მედია ბლოკები (YouTube) */
+    .media-container {
+      width: 100%;
+      max-width: 560px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      position: relative;
+      padding-top: 56.25%; 
+    }
+
+    .media-container iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* --- 4. პოლაროიდების გალერეა და სკრაჩ-ეფექტი --- */
+    .gallery {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+      max-width: 1000px;
+      padding: 20px;
+      width: 100%;
+    }
+
+    .polaroid {
+      background: white;
+      padding: 15px 15px 40px 15px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      width: 260px;
+      position: relative;
+      transition: transform 0.3s ease;
+    }
+
+    .polaroid:nth-child(odd) { transform: rotate(-4deg); }
+    .polaroid:nth-child(even) { transform: rotate(5deg); }
+    .polaroid:hover { transform: rotate(0deg) scale(1.05); z-index: 5; }
+
+    .image-wrapper {
+      position: relative;
+      width: 100%;
+      height: 280px; 
+      background: #e0e0e0;
+      overflow: hidden;
+    }
+
+    .image-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover; 
+      display: block;
+    }
+
+    .scratch-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #cfd8dc 0%, #90a4ae 100%);
+      color: #37474f;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      font-size: 14px;
+      cursor: pointer;
+      z-index: 2;
+      transition: all 0.5s ease;
+      border: 2px dashed rgba(255,255,255,0.4);
+    }
+
+    .scratch-layer span {
+      font-size: 24px;
+      margin-bottom: 5px;
+    }
+
+    /* საფარის გაქრობა კლიკზე */
+    #scratch-1:checked ~ .main-content .layer-1,
+    #scratch-2:checked ~ .main-content .layer-2,
+    #scratch-3:checked ~ .main-content .layer-3 {
+      opacity: 0;
+      transform: scale(1.3);
+      pointer-events: none;
+    }
+
+    .polaroid-caption {
+      text-align: center;
+      margin-top: 15px;
+      font-weight: bold;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+
+  <input type="checkbox" id="unlock-site" class="trigger-input">
+
+  <div class="lock-screen">
+    <div class="lock-card">
+      <h2>From: Nakosgan  <br> For: Mariamos ❤</h2>
+      <label for="unlock-site" id="unlock-button" class="unlock-btn">გახსნა</label>
+    </div>
+  </div>
+
+  <div class="main-content">
+    
+    <div class="romantic-text">
+      <p>"Sometimes I catch myself smiling at my phone just because of you... You make ordinary days feel softer and happier." ✨</p>
+    </div>
+
+    <div class="media-container">
+      <iframe id="yt-video" src="https://www.youtube.com/embed/AoFFZYDuNLo?si=SApsNiO3ie_WyYSo&enablejsapi=1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
+
+    <input type="checkbox" id="scratch-1" class="trigger-input">
+    <input type="checkbox" id="scratch-2" class="trigger-input">
+    <input type="checkbox" id="scratch-3" class="trigger-input">
+
+    <div class="gallery">
+
+      <div class="polaroid">
+        <div class="image-wrapper">
+          <img src="pic/main.jpg"" class="scratch-layer layer-1">
+            <span>✨</span> 
+          </label>
+          <img src="pic/meore.jpg" alt="Couple 1">
+        </div>
+        <div class="polaroid-caption"> </div>
+      </div>
+
+      <div class="polaroid">
+        <div class="image-wrapper">
+          <img src="pic/meore.jpg" class="scratch-layer layer-2">
+            <span>✨</span> 
+          </label>
+          <img src="pic/meore.jpg" alt="Couple 2">
+        </div>
+        <div class="polaroid-caption"> 🥰</div>
+      </div>
+
+      <div class="polaroid">
+        <div class="image-wrapper">
+          <img src="pic/mesame.jpg" class="scratch-layer layer-3">
+            <span>✨</span> 
+          </label>
+          <img src="pic/main.jpg" alt="Couple 3">
+        </div>
+        <div class="polaroid-caption"> 🌹</div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    document.getElementById('unlock-button').addEventListener('click', function() {
+      var iframe = document.getElementById('yt-video');
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+    });
+  </script>
+
+</body>
+</html>
